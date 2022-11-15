@@ -9,7 +9,7 @@ CREATE TABLE public.Users (
 	first_name varchar(80) NOT NULL,
 	last_name varchar(80) NOT NULL,
 	password varchar(80) NOT NULL,
-    squad uuid NOT NULL,
+    squad uuid,
     is_admin BOOLEAN NOT NULL,
 	created_at timestamptz default now(),
 	updated_at timestamptz,
