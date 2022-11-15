@@ -1,0 +1,11 @@
+# Ignore aquivos que utilizam o RESTclient para testar
+*.http
+
+# Ignore os arquivos que armazenam as variáveis ​​do ambiente
+.env
+
+# Ignore pastas de dependências
+node_modules/
+
+# Ignore arquivos de configuração do sistema
+.vscode
