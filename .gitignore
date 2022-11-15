@@ -9,3 +9,6 @@ node_modules/
 
 # Ignore arquivos de configuração do sistema
 .vscode
+
+# Ignore a pasta com os arquivos buildados pelo typescript
+dist/
