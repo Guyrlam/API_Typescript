@@ -25,7 +25,7 @@ export default class UsersServ {
             _data.password = await this.hashPassword(_data.password);
             _data.is_admin = false;
             _data.id = uuid();
-            const data = await repo.addUser(_data, _data.is_admin, _data.id);
+            const data = await repo.addUser(_data, _data.id);
             //change user interface
             return { data, err: null, errCode: null };
         } catch (err: any) {
