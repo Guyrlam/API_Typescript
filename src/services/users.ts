@@ -29,7 +29,19 @@ export default class UsersServ {
                 throw new Error('Id is not a uuid');
             }
             const result = await repository.getUserId(_id);
-            return {result, erro: null, errCode: null}
+            return {result, erro: null, errCode: null};
+        } catch (error: any) {
+            return { data: [], err: error.message, errCode: 500 };
+        }
+    }
+
+    async updateUser(_data: IUser){
+        const repository = new UserRepository();
+        try {
+            this.validate(_data);
+            _data.password = await this.hashPassword(_data?.password);
+            const result = await repository.updateUser(_data);
+            return {result, erro: null, errCode: null};
         } catch (error: any) {
             return { data: [], err: error.message, errCode: 500 };
         }

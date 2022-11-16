@@ -36,18 +36,19 @@ export class UserRepository {
         }
     }
 
-    async updateUser(user: any) {
+    async updateUser(_data: IUser) {
         const client = await pool.connect();
-        const param_username = user.username;
-        const param_email = user.email;
-        const param_firstName = user.firstName;
-        const param_lastName = user.lastName;
-        const param_password = user.password;
-        const param_squad = user.squad;
-        const param_isAdm = user.isAdm;
+        const param_id = _data.id;
+        const param_username = _data.user_name;
+        const param_email = _data.email;
+        const param_firstName = _data.first_name;
+        const param_lastName = _data.last_name;
+        const param_password = _data.password;
+        const param_squad = _data?.squad;
+        const param_isAdm = _data?.is_admin;
         const updateAt = new Date();
         const query =
-            'UPDATE public.users SET user_name = $1, email = $2, first_name = $3, last_name = $4, password = $5, squad = $6, is_admin = $7 WHERE id = $8';
+            'UPDATE public.users SET user_name = $1, email = $2, first_name = $3, last_name = $4, password = $5, squad = $6, is_admin = $7, updated_at = $8 WHERE id = $9';
         try {
             const result = await client.query(query, [
                 param_username,
@@ -58,6 +59,7 @@ export class UserRepository {
                 param_squad,
                 param_isAdm,
                 updateAt,
+                param_id
             ]);
             return result.rows;
         } catch (error: any) {
