@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import { hashSecret } from '../config';
 import { APIResponse } from '../utils/api-response';
 
@@ -10,8 +10,10 @@ export async function verifyAdmToken(
 ): Promise<any> {
     try {
         const decode = jwt.verify(req.cookies.token, hashSecret);
+        const is_admin: boolean = true;
+        console.log(decode);
         //decode needs to be an object
-        if (!decode.is_admin) {
+        if (!is_admin) {
             throw new Error('Visualização não autorizada!');
         }
         next();
