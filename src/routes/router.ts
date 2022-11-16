@@ -2,4 +2,7 @@ import { Router } from 'express';
 
 const route = Router();
 
-export { route };
+route.get('/users/:user_id');
+route.patch('/users/:user_id');
+
+export { route }
