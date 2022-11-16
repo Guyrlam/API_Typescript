@@ -9,12 +9,24 @@ export class UserRepository {
         const keystring = keys.join(', ');
         const indexstring = indexes.join(', ');
         const values = Object.values(_data as any);
-        const query = `INSERT INTO 
-        users (${keystring}) 
-        VALUES (${indexstring}) RETURNING *`;
+        const query = `INSERT INTO users (${keystring}) 
+                       VALUES (${indexstring}) RETURNING *`;
         try {
             console.log(Object.values(_data));
             const result = await client.query({ text: query, values: values });
+            return result.rows;
+        } catch (error: any) {
+            throw new Error(error.message);
+        } finally {
+            client.release();
+        }
+    }
+
+    async getUsers() {
+        const client = await pool.connect();
+        const query = 'SELECT * FROM public.users';
+        try {
+            const result = await client.query(query);
             return result.rows;
         } catch (error: any) {
             throw new Error(error.message);
@@ -28,7 +40,7 @@ export class UserRepository {
         const query = 'SELECT * FROM public.users WHERE id = $1';
         try {
             const result = await client.query(query, [id]);
-            return result.rows;
+            return result.rows[0];
         } catch (error: any) {
             throw new Error(error.message);
         } finally {
