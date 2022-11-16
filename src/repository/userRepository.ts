@@ -22,7 +22,7 @@ export class UserRepository {
         }
     }
 
-    async getUsers() {
+    async getAllUsers() {
         const client = await pool.connect();
         const query = 'SELECT * FROM public.users';
         try {

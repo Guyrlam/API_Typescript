@@ -6,6 +6,17 @@ import { IUser } from '../interfaces/iuser';
 import bcrypt from 'bcrypt';
 
 export default class UsersServ {
+    async getAllUsers(): Promise<any> {
+        const repo = new UserRepository();
+        try {
+            const user = await repo.getAllUsers();
+            return { user, err: null, errCode: null };
+        } catch (err: any) {
+            // console.log(err);
+            return { user: [], err: err.message, errCode: 500 };
+        }
+    }
+
     async addUser(_data: IUser): Promise<any> {
         const repo = new UserRepository();
         try {
@@ -14,7 +25,7 @@ export default class UsersServ {
             _data.password = await this.hashPassword(_data.password);
             _data.is_admin = false;
             _data.id = uuid();
-            const data = await repo.addUser(_data, _data.id);
+            const data = await repo.addUser(_data, _data.is_admin, _data.id);
             return { data, err: null, errCode: null };
         } catch (err: any) {
             // console.log(err);
