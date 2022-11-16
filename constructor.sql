@@ -9,8 +9,8 @@ CREATE TABLE public.Users (
 	first_name varchar(80) NOT NULL,
 	last_name varchar(80) NOT NULL,
 	password varchar(80) NOT NULL,
-    squad uuid,
-    is_admin BOOLEAN NOT NULL,
+	squad uuid,
+	is_admin BOOLEAN NOT NULL,
 	created_at timestamptz default now(),
 	updated_at timestamptz,
 	deleted_at timestamptz
@@ -19,7 +19,7 @@ CREATE TABLE public.Users (
 CREATE TABLE public.Squad (
 	id uuid NOT NULL PRIMARY KEY,
 	name varchar(80) NOT NULL,
-    leader uuid NOT NULL,
+  leader uuid NOT NULL,
 	created_at timestamptz default now(),
 	updated_at timestamptz,
 	deleted_at timestamptz

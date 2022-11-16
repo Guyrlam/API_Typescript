@@ -1,11 +1,22 @@
 import * as validators from '../validators';
 import { hashSecret } from '../config';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid, validate } from 'uuid';
 import { UserRepository } from '../repository/userRepository';
 import { IUser } from '../interfaces/iuser';
 import bcrypt from 'bcrypt';
 
 export default class UsersServ {
+    async getAllUsers(): Promise<any> {
+        const repo = new UserRepository();
+        try {
+            const user = await repo.getAllUsers();
+            return { user, err: null, errCode: null };
+        } catch (err: any) {
+            // console.log(err);
+            return { user: [], err: err.message, errCode: 500 };
+        }
+    }
+
     async addUser(_data: IUser): Promise<any> {
         const repo = new UserRepository();
         try {
@@ -15,10 +26,36 @@ export default class UsersServ {
             _data.is_admin = false;
             _data.id = uuid();
             const data = await repo.addUser(_data, _data.id);
+            //change user interface
             return { data, err: null, errCode: null };
         } catch (err: any) {
             // console.log(err);
             return { data: [], err: err.message, errCode: 500 };
+        }
+    }
+
+    async getUserId(_id: string){
+        const repository = new UserRepository();
+        try {
+            if(!validate(_id)){
+                throw new Error('Id is not a uuid');
+            }
+            const result = await repository.getUserId(_id);
+            return {result, erro: null, errCode: null};
+        } catch (error: any) {
+            return { data: [], err: error.message, errCode: 500 };
+        }
+    }
+
+    async updateUser(_data: IUser){
+        const repository = new UserRepository();
+        try {
+            this.validate(_data);
+            _data.password = await this.hashPassword(_data?.password);
+            const result = await repository.updateUser(_data);
+            return {result, erro: null, errCode: null};
+        } catch (error: any) {
+            return { data: [], err: error.message, errCode: 500 };
         }
     }
 
