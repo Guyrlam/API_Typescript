@@ -1,6 +1,6 @@
 import * as validators from '../validators';
 import { hashSecret } from '../config';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid, validate } from 'uuid';
 import { UserRepository } from '../repository/userRepository';
 import { IUser } from '../interfaces/iuser';
 import bcrypt from 'bcrypt';
@@ -19,6 +19,19 @@ export default class UsersServ {
         } catch (err: any) {
             // console.log(err);
             return { data: [], err: err.message, errCode: 500 };
+        }
+    }
+
+    async getUserId(_id: string){
+        const repository = new UserRepository();
+        try {
+            if(!validate(_id)){
+                throw new Error('Id is not a uuid');
+            }
+            const result = await repository.getUserId(_id);
+            return {result, erro: null, errCode: null}
+        } catch (error: any) {
+            return { data: [], err: error.message, errCode: 500 };
         }
     }
 
