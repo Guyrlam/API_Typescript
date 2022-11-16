@@ -10,6 +10,7 @@ export async function verifyAdmToken(
 ): Promise<any> {
     try {
         const decode = jwt.verify(req.cookies.token, hashSecret);
+        //decode needs to be an object
         if (!decode.is_admin) {
             throw new Error('Visualização não autorizada!');
         }
