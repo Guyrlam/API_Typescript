@@ -3,4 +3,4 @@ import { databaseConfig } from '../config';
 
 const pool = new Pool(databaseConfig);
 
-module.exports = { pool };
+export { pool };

@@ -7,6 +7,7 @@ dotenv.config();
 
 // server config
 const port = env.PORT;
+const hashSecret: string = env.HASH_SECRET as string;
 
 const corsOptions: CorsOptions = {
     origin: ['http://127.0.0.1:5500'],
@@ -25,4 +26,4 @@ const databaseConfig: PoolConfig = {
     connectionTimeoutMillis: 2000,
 };
 
-export { port, corsOptions, databaseConfig };
+export { port, corsOptions, databaseConfig, hashSecret };
