@@ -107,3 +107,15 @@ export async function updateUser(req: Request, res: Response) {
         return APIResponse.error(res, (e as Error).message);
     }
 }
+
+export async function delUser(req: Request, res: Response) {
+    try {
+        const newUser = new UsersServ();
+        const response = await newUser.delUser(req.params.user_id);
+        const token = jwt.sign(req.cookies, hashSecret, { expiresIn: '1800s' });
+        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
+        return APIResponse.sucess(res, response, 201);
+    } catch (e: any) {
+        return APIResponse.error(res, (e as Error).message);
+    }
+}
