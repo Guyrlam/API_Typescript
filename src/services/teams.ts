@@ -34,6 +34,20 @@ export default class TeamsServ {
         }
     }
 
+    async delTeams(id: string): Promise<{
+        team: ITeams[];
+        err: null | Error;
+        errCode: null | number;
+    }> {
+        try {
+            const repo = new TeamsRepository();
+            const team = await repo.getDelete(id);
+            return { team, err: null, errCode: null };
+        } catch (err: any) {
+            return { team: [], err: err.message, errCode: 500 };
+        }
+    }
+
     public validate(_data: ITeams) {
         const validator = new TeamsValidator(_data); // alterar
         if (validator.errors) {

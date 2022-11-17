@@ -72,10 +72,9 @@ export class TeamsRepository {
         }
     }
 
-    async getDelete(teams: any) {
-        const id = teams.id;
+    async getDelete(id: string) {
         const client = await pool.connect();
-        const query = 'DELETE * FROM public.Squad WHERE id = $1';
+        const query = 'UPDATE public.Squad SET deleted_at = now() WHERE id = $1';
         try {
             const result = await client.query(query, [id]);
             return result.rows;
