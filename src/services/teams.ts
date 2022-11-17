@@ -7,8 +7,8 @@ import bcrypt from 'bcrypt';
 
 export default class TeamsServ {
     async addTeams(_data: ITeams): Promise<any> {
-        const repo = new TeamsRepository();
         try {
+            const repo = new TeamsRepository();
             this.validate(_data);
             console.log(_data);
             _data.id = uuid();
@@ -17,6 +17,20 @@ export default class TeamsServ {
         } catch (err: any) {
             // console.log(err);
             return { data: [], err: err.message, errCode: 500 };
+        }
+    }
+
+    async getTeams(): Promise<{
+        team: ITeams[];
+        err: null | Error;
+        errCode: null | number;
+    }> {
+        try {
+            const repo = new TeamsRepository();
+            const team = await repo.getTeams();
+            return { team, err: null, errCode: null };
+        } catch (err: any) {
+            return { team: [], err: err.message, errCode: 500 };
         }
     }
 
