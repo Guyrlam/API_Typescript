@@ -1,6 +1,6 @@
 import * as validators from '../validators';
 import { hashSecret } from '../config';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid, validate } from 'uuid';
 import { UserRepository } from '../repository/userRepository';
 import { IUser, ILogin } from '../interfaces/iuser';
 import bcrypt from 'bcrypt';
@@ -33,7 +33,6 @@ export default class UsersServ {
             return { data: [], err: err.message, errCode: 500 };
         }
     }
-
     async login(_data: ILogin): Promise<any> {
         const repo = new UserRepository();
         try {
@@ -60,6 +59,28 @@ export default class UsersServ {
         } catch (err: any) {
             // console.log(err);
             return { data: [], err: err.message, errCode: 500 };
+    async getUserId(_id: string) {
+        const repository = new UserRepository();
+        try {
+            if (!validate(_id)) {
+                throw new Error('Id is not a uuid');
+            }
+            const result = await repository.getUserId(_id);
+            return { result, erro: null, errCode: null };
+        } catch (error: any) {
+            return { data: [], err: error.message, errCode: 500 };
+        }
+    }
+
+    async updateUser(_data: IUser) {
+        const repository = new UserRepository();
+        try {
+            this.validate(_data);
+            _data.password = await this.hashPassword(_data?.password);
+            const result = await repository.updateUser(_data);
+            return { result, erro: null, errCode: null };
+        } catch (error: any) {
+            return { data: [], err: error.message, errCode: 500 };
         }
     }
 
