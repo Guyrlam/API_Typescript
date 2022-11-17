@@ -44,6 +44,22 @@ async function delTeam(req: Request, res: Response) {
     }
 }
 
+async function removeMember(req: Request, res: Response) {
+    const service = new TeamsServ();
+    const response = await service.removeMember(
+        req.params.team_id,
+        req.params.user_id
+    );
+
+    if (response.err === null) {
+        const token = jwt.sign(req.cookies, hashSecret, { expiresIn: '1800s' });
+        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
+        return APIResponse.sucess(res, response, 201);
+    } else {
+        return APIResponse.error(res, (response.err as Error).message);
+    }
+}
+
 async function getTeam(req: Request, res: Response) {
     const service = new TeamsServ();
     const response = await service.getTeamById(req.params.team_id);
@@ -57,4 +73,4 @@ async function getTeam(req: Request, res: Response) {
     }
 }
 
-export { registerTeam, returnTeam, delTeam, getTeam };
+export { registerTeam, returnTeam, delTeam, getTeam, removeMember };
