@@ -35,6 +35,19 @@ export async function returnUsersList(req: Request, res: Response) {
     }
 }
 
+export async function returnMe(req: Request, res: Response) {
+    try {
+        const payload = (req as AuthRequest).user;
+        const newUser = new UsersServ();
+        const response = await newUser.getUserId(payload);
+        const token = jwt.sign(payload, hashSecret, { expiresIn: '1800s' });
+        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
+        return APIResponse.sucess(res, response, 201);
+    } catch (e: any) {
+        return APIResponse.error(res, (e as Error).message);
+    }
+}
+
 export async function register(req: Request, res: Response) {
     const userData: IUser = req.body;
     try {
