@@ -5,6 +5,7 @@ import { AuthRequest } from '../interfaces/irequest';
 import jwt from 'jsonwebtoken';
 import { hashSecret } from '../config';
 import { APIResponse } from '../utils/api-response';
+import { IUserUpdate } from '../interfaces/iuserUpd';
 
 export async function logUser(req: Request, res: Response) {
     const service = new UsersServ();
@@ -78,10 +79,11 @@ export async function getUserId(req: Request, res: Response) {
 }
 
 export async function updateUser(req: Request, res: Response) {
-    const userData: IUser = req.body;
+    const userData: IUserUpdate = req.body;
+    const id = req.params.user_id;
     try {
         const newUser = new UsersServ();
-        const response = await newUser.updateUser(userData);
+        const response = await newUser.updateUser(userData, id);
         return APIResponse.sucess(res, response, 201);
     } catch (e: any) {
         return APIResponse.error(res, (e as Error).message);
