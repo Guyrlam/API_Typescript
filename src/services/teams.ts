@@ -3,14 +3,12 @@ import { hashSecret } from '../config';
 import { v4 as uuid } from 'uuid';
 import { TeamsRepository } from '../repository/teamsRepository';
 import { ITeams } from '../interfaces/iteams';
-import bcrypt from 'bcrypt';
 
 export default class TeamsServ {
     async addTeams(_data: ITeams): Promise<any> {
         try {
             const repo = new TeamsRepository();
             this.validate(_data);
-            console.log(_data);
             _data.id = uuid();
             const data = await repo.addTeams(_data, _data.id);
             return { data, err: null, errCode: null };
@@ -91,5 +89,20 @@ export default class TeamsServ {
 class TeamsValidator extends validators.Validator {
     constructor(data: ITeams) {
         super(data);
+
+        this.data.name = this.checkName(data.name);
+        this.data.leader = this.checkLeader(data.leader);
+    }
+
+    checkName(name: string) {
+        const validator = new validators.NameValidator(name, { max_length: 255 });
+        if (validator.errors) this.errors += `email:${validator.errors},`;
+        return validator.data;
+    }
+
+    checkLeader(id: string) {
+        const validator = new validators.UUIDValidator(id, { max_length: 255 });
+        if (validator.errors) this.errors += `user_name:${validator.errors},`;
+        return validator.data;
     }
 }
