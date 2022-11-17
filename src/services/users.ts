@@ -4,6 +4,7 @@ import { v4 as uuid, validate } from 'uuid';
 import { UserRepository } from '../repository/userRepository';
 import { IUser, ILogin } from '../interfaces/iuser';
 import bcrypt from 'bcrypt';
+import { IUserUpdate } from '../interfaces/iuserUpd';
 
 export default class UsersServ {
     async login(_data: { email: string; password: string }): Promise<any> {
@@ -105,12 +106,13 @@ export default class UsersServ {
         }
     }
 
-    async updateUser(_data: IUser) {
+    async updateUser(_data: IUserUpdate, _id: string) {
         const repository = new UserRepository();
         try {
-            this.validate(_data);
-            _data.password = await this.hashPassword(_data?.password);
-            const result = await repository.updateUser(_data);
+            if (_data?.password) {
+                _data.password = await this.hashPassword(_data.password);
+            }
+            const result = await repository.updateUser(_data, _id);
             return { result, erro: null, errCode: null };
         } catch (error: any) {
             return { data: [], err: error.message, errCode: 500 };

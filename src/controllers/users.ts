@@ -5,6 +5,7 @@ import { AuthRequest } from '../interfaces/irequest';
 import jwt from 'jsonwebtoken';
 import { hashSecret } from '../config';
 import { APIResponse } from '../utils/api-response';
+import { IUserUpdate } from '../interfaces/iuserUpd';
 
 export async function logUser(req: Request, res: Response) {
     const service = new UsersServ();
@@ -82,7 +83,7 @@ export async function register(req: Request, res: Response) {
 } */
 
 export async function getUserId(req: Request, res: Response) {
-    const id = req.body;
+    const id = req.params.user_id;
     try {
         const newUser = new UsersServ();
         const response = await newUser.getUserId(id);
@@ -95,11 +96,12 @@ export async function getUserId(req: Request, res: Response) {
 }
 
 export async function updateUser(req: Request, res: Response) {
-    const userData: IUser = req.body;
+    const userData: IUserUpdate = req.body;
+    const id = req.params.user_id;
     try {
         const payload = (req as AuthRequest).user.payload;
         const newUser = new UsersServ();
-        const response = await newUser.updateUser(userData);
+        const response = await newUser.updateUser(userData, id);
         const token = jwt.sign(payload, hashSecret, { expiresIn: '1800s' });
         res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         return APIResponse.sucess(res, response, 201);
