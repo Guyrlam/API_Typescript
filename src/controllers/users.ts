@@ -68,7 +68,7 @@ export async function login(req: Request, res: Response) {
 }
 
 export async function getUserId(req: Request, res: Response) {
-    const id = req.body;
+    const id = req.params.user_id;
     try {
         const newUser = new UsersServ();
         const response = await newUser.getUserId(id);
