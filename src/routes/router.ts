@@ -24,7 +24,7 @@ route.post('/users/', register);
 route.get('/users/me', authenticateToken, ownUser);
 route.get('/users', authenticateToken, verifyAdmToken, returnUsersList);
 route.get('/users/:user_id', getUserId);
-route.patch('/users/:user_id', updateUser);
+route.patch('/users/:user_id', authenticateToken, updateUser);
 
 route.post('/team/', registerTeam);
 route.get('/team/:team_id', verifySquad, getTeam);

@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import { parse as uuidParse, v4 as uuid } from 'uuid';
 import { IUserUpdate } from '../interfaces/iuserUpd';
 import { pool } from './index';
 import { IUser } from '../interfaces/iuser';
@@ -69,8 +70,10 @@ export class UserRepository {
         const keystring = keys.join(', ');
         const indexstring = indexes.join(', ');
         const values = Object.values(_data as any);
-        const query = `UPDATE public.users SET ${indexstring} WHERE id = ${_id}`;
-        console.log(query);
+        values.push(_id);
+        const query = `UPDATE public.users SET ${indexstring} WHERE id = $${
+            indexes.length + 1
+        }`;
         try {
             const result = await client.query(query, values);
             return result.rows;

@@ -8,8 +8,8 @@ export interface IUserUpdate {
     last_name?: string;
     password?: string;
     squad?: string;
-    updated_at?: Date;
-    created_at?: Date;
-    deleted_at?: Date;
+    updated_at?: string;
+    created_at?: string;
+    deleted_at?: string;
     is_admin?: boolean;
 }

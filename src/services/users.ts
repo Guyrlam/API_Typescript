@@ -113,7 +113,7 @@ export default class UsersServ {
             this.validateUserUpadate(_data);
             if (_data.password)
                 _data.password = await this.hashPassword(_data?.password);
-            _data.updated_at = new Date();
+            _data.updated_at = new Date().toISOString();
             const result = await repository.updateUser(_id, _data);
             return { result, erro: null, errCode: null };
         } catch (error: any) {

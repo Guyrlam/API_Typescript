@@ -93,6 +93,11 @@ export async function updateUser(req: Request, res: Response) {
     const userData: IUserUpdate = req.body;
     try {
         const id = req.params.user_id;
+        const idUser = (req as AuthRequest).user.id;
+        // console.log(id,idUser)
+        if (id != idUser) {
+            throw new Error('500|Você não pode Alterar esta conta');
+        }
         const newUser = new UsersServ();
         const response = await newUser.updateUser(id, userData);
         return APIResponse.sucess(res, response, 201);
