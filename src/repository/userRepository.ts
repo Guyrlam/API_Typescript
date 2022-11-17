@@ -71,7 +71,7 @@ export class UserRepository {
                 param_squad,
                 param_isAdm,
                 updateAt,
-                param_id
+                param_id,
             ]);
             return result.rows;
         } catch (error: any) {
