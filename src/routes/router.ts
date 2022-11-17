@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { register, returnUsersList } from '../controllers/users';
+import { register, returnUsersList, login } from '../controllers/users';
+import authenticateToken from '../middleware/authtenticate';
 import {
     registerTeam,
     returnTeam,
@@ -12,9 +13,8 @@ import { verifyAdmToken, verifyLeaderSquad, verifySquad } from '../middleware/lo
 const route = Router();
 
 route.post('/users/', register);
-route.get('/users', verifyAdmToken, returnUsersList);
-route.get('/users/:user_id');
-route.get('/users/me');
+route.post('/users/login', login);
+route.get('/users/', authenticateToken, returnUsersList);
 route.patch('/users/:user_id');
 
 route.post('/team/', registerTeam);
