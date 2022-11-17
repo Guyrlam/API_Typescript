@@ -10,4 +10,10 @@ route.get('/users/:user_id');
 route.get('/users/me');
 route.patch('/users/:user_id');
 
+route.post('/team/', register);
+route.get('/team/:team_id');
+route.get('/team/');
+route.patch('/team/:team_id');
+route.delete('/team/:team_id');
+
 export { route };
