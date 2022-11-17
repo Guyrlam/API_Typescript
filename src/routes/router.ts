@@ -5,6 +5,7 @@ import {
     getUserId,
     updateUser,
     logUser,
+    returnMe,
 } from '../controllers/users';
 import authenticateToken from '../middleware/authtenticate';
 import {
@@ -20,11 +21,11 @@ const route = Router();
 
 route.post('/login/', logUser);
 route.post('/users/', register);
+route.get('/users/me', authenticateToken, returnMe);
 route.get('/users', verifyAdmToken, returnUsersList);
 route.get('/users/:user_id', getUserId);
-route.get('/users/me');
 route.patch('/users/:user_id', updateUser);
-
+route.delete('/users/:user_id');
 route.post('/team/', registerTeam);
 route.get('/team/:team_id', verifySquad, getTeam);
 route.get('/team/', verifyAdmToken, returnTeam);
