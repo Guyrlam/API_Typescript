@@ -105,4 +105,24 @@ export class TeamsRepository {
             client.release();
         }
     }
+
+    async addMember(team_id: string, user_id: string) {
+        const client = await pool.connect();
+        const query = 'UPDATE public.Users SET squad = $1 WHERE id = $2';
+        try {
+            await client.query('BEGIN');
+            const response = new UserRepository();
+            const user = await response.getUserId(user_id);
+            if (user[0].squad !== null)
+                throw new Error('O usuário já pertence a um time');
+            const result = await client.query(query, [team_id, user_id]);
+            await client.query('COMMIT');
+            return result.rows;
+        } catch (error: any) {
+            await client.query('ROLLBACK');
+            throw new Error(error.message);
+        } finally {
+            client.release();
+        }
+    }
 }

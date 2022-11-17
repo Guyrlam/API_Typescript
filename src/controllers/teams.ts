@@ -73,4 +73,17 @@ async function getTeam(req: Request, res: Response) {
     }
 }
 
-export { registerTeam, returnTeam, delTeam, getTeam, removeMember };
+async function addMember(req: Request, res: Response) {
+    const service = new TeamsServ();
+    const response = await service.addMember(req.params.team_id, req.params.user_id);
+
+    if (response.err === null) {
+        const token = jwt.sign(req.cookies, hashSecret, { expiresIn: '1800s' });
+        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
+        return APIResponse.sucess(res, response, 201);
+    } else {
+        return APIResponse.error(res, (response.err as Error).message);
+    }
+}
+
+export { registerTeam, returnTeam, delTeam, getTeam, removeMember, addMember };
