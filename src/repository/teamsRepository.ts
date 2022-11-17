@@ -11,12 +11,26 @@ export class TeamsRepository {
         const indexstring = indexes.join(', ');
         const values = Object.values(_data as any);
         const query = `INSERT INTO 
-        teams (${keystring}) 
+        squad (${keystring}) 
         VALUES (${indexstring}) RETURNING *`;
         try {
             console.log(Object.values(_data));
             const result = await client.query({ text: query, values: values });
             return result.rows;
+        } catch (error: any) {
+            throw new Error(error.message);
+        } finally {
+            client.release();
+        }
+    }
+
+    async addUserTeams(_idUser: string, _idSquad: string) {
+        const client = await pool.connect();
+        const values = [_idSquad, _idUser];
+        const query = `UPDATE public.Users SET squad = $1 WHERE id = $2`;
+        try {
+            const result = await client.query({ text: query, values: values });
+            return result.rows[0];
         } catch (error: any) {
             throw new Error(error.message);
         } finally {
@@ -88,13 +102,14 @@ export class TeamsRepository {
 
     async remove(team_id: string, user_id: string) {
         const client = await pool.connect();
-        const query = 'UPDATE public.Users SET squad = null WHERE id = $1';
+        const query = `UPDATE public.Users SET squad = null WHERE id = $1`;
         try {
             await client.query('BEGIN');
             const response = new UserRepository();
             const user = await response.getUserId(user_id);
-            if (user[0].squad !== team_id)
-                throw new Error('O usuário não pertence a esse time');
+            console.log(user);
+            if (user.squad != team_id)
+                throw new Error('500|O usuário não pertence a esse time');
             const result = await client.query(query, [user_id]);
             await client.query('COMMIT');
             return result.rows;

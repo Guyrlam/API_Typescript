@@ -4,8 +4,8 @@ CREATE DATABASE API_Typescript;
 ---Criação das tabelas no Schema public
 CREATE TABLE public.Users (
 	id uuid NOT NULL PRIMARY KEY,
-	user_name varchar(80) NOT NULL,
-	email varchar(80) NOT NULL,
+	user_name varchar(80) UNIQUE NOT NULL,
+	email varchar(80) UNIQUE NOT NULL,
 	first_name varchar(80) NOT NULL,
 	last_name varchar(80) NOT NULL,
 	password varchar(80) NOT NULL,

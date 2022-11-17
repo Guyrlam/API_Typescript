@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { hashSecret } from '../config';
 import { APIResponse } from '../utils/api-response';
@@ -13,12 +13,12 @@ type JWTPayload = {
 export async function verifyAdmToken(
     req: Request,
     res: Response,
-    next: () => void
+    next: NextFunction
 ): Promise<void | APIResponse> {
     try {
         const decode = jwt.verify(req.cookies.token, hashSecret) as JWTPayload;
         if (!decode.is_admin) {
-            throw new Error('Operação não autorizada!');
+            throw new Error('500|Operação não autorizada!');
         }
         req.cookies = {
             id: decode.id,
@@ -35,7 +35,7 @@ export async function verifyAdmToken(
 export async function verifySquad(
     req: Request,
     res: Response,
-    next: () => void
+    next: NextFunction
 ): Promise<void | APIResponse> {
     try {
         const decode = jwt.verify(req.cookies.token, hashSecret) as JWTPayload;
@@ -57,7 +57,7 @@ export async function verifySquad(
 export async function verifyLeaderSquad(
     req: Request,
     res: Response,
-    next: () => void
+    next: NextFunction
 ): Promise<void | APIResponse> {
     try {
         const decode = jwt.verify(req.cookies.token, hashSecret) as JWTPayload;
@@ -79,7 +79,7 @@ export async function verifyLeaderSquad(
 export async function verifyLeader(
     req: Request,
     res: Response,
-    next: () => void
+    next: NextFunction
 ): Promise<void | APIResponse> {
     try {
         const decode = jwt.verify(req.cookies.token, hashSecret) as JWTPayload;

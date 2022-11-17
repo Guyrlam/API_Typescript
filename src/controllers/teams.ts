@@ -6,15 +6,30 @@ import { hashSecret } from '../config';
 import { APIResponse } from '../utils/api-response';
 
 async function registerTeam(req: Request, res: Response) {
+    const team: ITeams = req.body;
     const service = new TeamsServ();
-    const response = await service.addTeams(req.body);
+    const response = await service.addTeams(team);
+
+    if (response.err === null) {
+        return APIResponse.sucess(res, response, 201);
+    } else {
+        return APIResponse.error(res, response.err);
+    }
+}
+
+async function addUserTeam(req: Request, res: Response) {
+    const id_user = req.params.user_id;
+    const id_team = req.params.team_id;
+    const service = new TeamsServ();
+    const response = await service.addUserTeam(id_user, id_team);
 
     if (response.err === null) {
         const token = jwt.sign(req.cookies, hashSecret, { expiresIn: '1800s' });
         res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         return APIResponse.sucess(res, response, 201);
     } else {
-        return APIResponse.error(res, (response.err as Error).message);
+        console.log(response.err);
+        return APIResponse.error(res, response.err);
     }
 }
 
@@ -52,11 +67,10 @@ async function removeMember(req: Request, res: Response) {
     );
 
     if (response.err === null) {
-        const token = jwt.sign(req.cookies, hashSecret, { expiresIn: '1800s' });
-        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         return APIResponse.sucess(res, response, 201);
     } else {
-        return APIResponse.error(res, (response.err as Error).message);
+        const erro: string = response.err;
+        return APIResponse.error(res, erro);
     }
 }
 
@@ -73,4 +87,4 @@ async function getTeam(req: Request, res: Response) {
     }
 }
 
-export { registerTeam, returnTeam, delTeam, getTeam, removeMember };
+export { registerTeam, returnTeam, delTeam, getTeam, removeMember, addUserTeam };

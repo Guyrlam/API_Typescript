@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import UsersServ from '../services/users';
-import { IUser, ILogin } from '../interfaces/iuser';
+import { IUser, ILogin, IUserUpdate } from '../interfaces/iuser';
 import { AuthRequest } from '../interfaces/irequest';
 import jwt from 'jsonwebtoken';
 import { hashSecret } from '../config';
@@ -11,7 +11,7 @@ export async function logUser(req: Request, res: Response) {
     const response = await service.login(req.body);
 
     if (response.err === null) {
-        const token = jwt.sign(response, hashSecret, { expiresIn: '1800s' });
+        const token = jwt.sign(response.payload, hashSecret, { expiresIn: '1800s' });
         res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         return APIResponse.sucess(
             res,
@@ -19,12 +19,11 @@ export async function logUser(req: Request, res: Response) {
             201
         );
     } else {
-        return APIResponse.error(res, (response.err as Error).message);
+        return APIResponse.error(res, response.err);
     }
 }
 
 export async function returnUsersList(req: Request, res: Response) {
-    console.log((req as AuthRequest).user);
     try {
         const newUser = new UsersServ();
         const response = await newUser.getAllUsers();
@@ -37,11 +36,9 @@ export async function returnUsersList(req: Request, res: Response) {
 
 export async function returnMe(req: Request, res: Response) {
     try {
-        const payload = (req as AuthRequest).user.payload;
+        const payload = (req as AuthRequest).user;
         const newUser = new UsersServ();
         const response = await newUser.getUserId(payload.id);
-        const token = jwt.sign(payload, hashSecret, { expiresIn: '1800s' });
-        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         delete response.result.password;
         return APIResponse.sucess(res, response.result, 201);
     } catch (e: any) {
@@ -82,12 +79,10 @@ export async function register(req: Request, res: Response) {
 } */
 
 export async function getUserId(req: Request, res: Response) {
-    const id = req.body;
+    const id = req.params.user_id;
     try {
         const newUser = new UsersServ();
         const response = await newUser.getUserId(id);
-        const token = jwt.sign(req.cookies, hashSecret, { expiresIn: '1800s' });
-        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         return APIResponse.sucess(res, response, 201);
     } catch (e: any) {
         return APIResponse.error(res, (e as Error).message);
@@ -95,13 +90,16 @@ export async function getUserId(req: Request, res: Response) {
 }
 
 export async function updateUser(req: Request, res: Response) {
-    const userData: IUser = req.body;
+    const userData: IUserUpdate = req.body;
     try {
-        const payload = (req as AuthRequest).user.payload;
+        const id = req.params.user_id;
+        const idUser = (req as AuthRequest).user.id;
+        if (id != idUser) {
+            console.log(id, idUser);
+            return res.sendStatus(401);
+        }
         const newUser = new UsersServ();
-        const response = await newUser.updateUser(userData);
-        const token = jwt.sign(payload, hashSecret, { expiresIn: '1800s' });
-        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
+        const response = await newUser.updateUser(id, userData);
         return APIResponse.sucess(res, response, 201);
     } catch (e: any) {
         return APIResponse.error(res, (e as Error).message);

@@ -1,5 +1,12 @@
 export interface ITeams {
-    id: string;
+    id?: string;
     name: string;
     leader: string;
+}
+
+export interface ITeamList {
+    id?: string;
+    name: string;
+    leader: any;
+    employees: Array<any>;
 }

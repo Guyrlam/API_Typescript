@@ -1,6 +1,6 @@
 import * as validators from '../validators';
 import { hashSecret } from '../config';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid, validate as uuidValidate } from 'uuid';
 import { TeamsRepository } from '../repository/teamsRepository';
 import { ITeams } from '../interfaces/iteams';
 
@@ -11,6 +11,21 @@ export default class TeamsServ {
             this.validate(_data);
             _data.id = uuid();
             const data = await repo.addTeams(_data, _data.id);
+            repo.addUserTeams(_data.leader, _data.id);
+            return { data, err: null, errCode: null };
+        } catch (err: any) {
+            // console.log(err);
+            return { data: [], err: err.message, errCode: 500 };
+        }
+    }
+
+    async addUserTeam(_idUser: string, _idSquad: string): Promise<any> {
+        try {
+            const repo = new TeamsRepository();
+            if (!uuidValidate(_idUser) && !uuidValidate(_idSquad)) {
+                throw new Error('500|ids invalid');
+            }
+            const data = await repo.addUserTeams(_idUser, _idSquad);
             return { data, err: null, errCode: null };
         } catch (err: any) {
             // console.log(err);
@@ -65,7 +80,7 @@ export default class TeamsServ {
         user_id: string
     ): Promise<{
         team: ITeams[];
-        err: null | Error;
+        err: null | string;
         errCode: null | number;
     }> {
         try {
@@ -96,13 +111,13 @@ class TeamsValidator extends validators.Validator {
 
     checkName(name: string) {
         const validator = new validators.NameValidator(name, { max_length: 255 });
-        if (validator.errors) this.errors += `email:${validator.errors},`;
+        if (validator.errors) this.errors += `name:${validator.errors},`;
         return validator.data;
     }
 
     checkLeader(id: string) {
         const validator = new validators.UUIDValidator(id, { max_length: 255 });
-        if (validator.errors) this.errors += `user_name:${validator.errors},`;
+        if (validator.errors) this.errors += `id_user_leader:${validator.errors},`;
         return validator.data;
     }
 }

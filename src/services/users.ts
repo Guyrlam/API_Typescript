@@ -2,7 +2,7 @@ import * as validators from '../validators';
 import { databaseConfig, hashSecret } from '../config';
 import { v4 as uuid, validate } from 'uuid';
 import { UserRepository } from '../repository/userRepository';
-import { IUser, ILogin } from '../interfaces/iuser';
+import { IUser, ILogin, IUserUpdate } from '../interfaces/iuser';
 import bcrypt from 'bcrypt';
 
 export default class UsersServ {
@@ -96,7 +96,7 @@ export default class UsersServ {
         const repository = new UserRepository();
         try {
             if (!validate(_id)) {
-                throw new Error('Id is not a uuid');
+                throw new Error('400|Id is not a uuid');
             }
             const result = await repository.getUserId(_id);
             return { result, erro: null, errCode: null };
@@ -105,12 +105,14 @@ export default class UsersServ {
         }
     }
 
-    async updateUser(_data: IUser) {
+    async updateUser(_id: string, _data: IUserUpdate) {
         const repository = new UserRepository();
         try {
-            this.validate(_data);
-            _data.password = await this.hashPassword(_data?.password);
-            const result = await repository.updateUser(_data);
+            this.validateUserUpadate(_data);
+            if (_data.password)
+                _data.password = await this.hashPassword(_data?.password);
+            _data.updated_at = new Date().toISOString();
+            const result = await repository.updateUser(_id, _data);
             return { result, erro: null, errCode: null };
         } catch (error: any) {
             return { data: [], err: error.message, errCode: 500 };
@@ -139,6 +141,13 @@ export default class UsersServ {
     }
     public validateLogin(_data: ILogin) {
         const validator = new LoginValidator(_data);
+        if (validator.errors) {
+            console.log(validator.errors);
+            throw new Error(validator.errors);
+        }
+    }
+    public validateUserUpadate(_data: IUserUpdate) {
+        const validator = new UserUpdateValidator(_data);
         if (validator.errors) {
             console.log(validator.errors);
             throw new Error(validator.errors);
@@ -207,6 +216,48 @@ class LoginValidator extends validators.Validator {
     checkEmail(email: string) {
         const validator = new validators.EmailValidator(email, { max_length: 255 });
         if (validator.errors) this.errors += `email:${validator.errors},`;
+        return validator.data;
+    }
+
+    checkPassword(password: string) {
+        const validator = new validators.PasswordValidator(password, {
+            max_length: 255,
+        });
+        if (validator.errors) this.errors += `password:${validator.errors},`;
+        return validator.data;
+    }
+}
+class UserUpdateValidator extends validators.Validator {
+    constructor(data: IUserUpdate) {
+        super(data);
+
+        if (data.email) this.data.email = this.checkEmail(data.email);
+        if (data.user_name) this.data.user_name = this.checkUserName(data.user_name);
+        if (data.first_name)
+            this.data.first_name = this.checkFirstName(data.first_name);
+        if (data.last_name) this.data.last_name = this.checkLastName(data.last_name);
+        if (data.password) this.data.password = this.checkPassword(data.password);
+    }
+
+    checkEmail(email: string) {
+        const validator = new validators.EmailValidator(email, { max_length: 255 });
+        if (validator.errors) this.errors += `email:${validator.errors},`;
+        return validator.data;
+    }
+
+    checkUserName(name: string) {
+        const validator = new validators.NameValidator(name, { max_length: 255 });
+        if (validator.errors) this.errors += `user_name:${validator.errors},`;
+        return validator.data;
+    }
+    checkFirstName(name: string) {
+        const validator = new validators.NameValidator(name, { max_length: 255 });
+        if (validator.errors) this.errors += `first_name:${validator.errors},`;
+        return validator.data;
+    }
+    checkLastName(name: string) {
+        const validator = new validators.NameValidator(name, { max_length: 255 });
+        if (validator.errors) this.errors += `last_name:${validator.errors},`;
         return validator.data;
     }
 
