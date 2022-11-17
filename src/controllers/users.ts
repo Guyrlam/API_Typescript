@@ -86,6 +86,8 @@ export async function getUserId(req: Request, res: Response) {
     try {
         const newUser = new UsersServ();
         const response = await newUser.getUserId(id);
+        const token = jwt.sign(req.cookies, hashSecret, { expiresIn: '1800s' });
+        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         return APIResponse.sucess(res, response, 201);
     } catch (e: any) {
         return APIResponse.error(res, (e as Error).message);
@@ -95,8 +97,11 @@ export async function getUserId(req: Request, res: Response) {
 export async function updateUser(req: Request, res: Response) {
     const userData: IUser = req.body;
     try {
+        const payload = (req as AuthRequest).user.payload;
         const newUser = new UsersServ();
         const response = await newUser.updateUser(userData);
+        const token = jwt.sign(payload, hashSecret, { expiresIn: '1800s' });
+        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         return APIResponse.sucess(res, response, 201);
     } catch (e: any) {
         return APIResponse.error(res, (e as Error).message);
