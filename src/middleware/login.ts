@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { hashSecret } from '../config';
 import { APIResponse } from '../utils/api-response';
@@ -13,7 +13,7 @@ type JWTPayload = {
 export async function verifyAdmToken(
     req: Request,
     res: Response,
-    next: () => void
+    next: NextFunction
 ): Promise<void | APIResponse> {
     try {
         const decode = jwt.verify(req.cookies.token, hashSecret) as JWTPayload;

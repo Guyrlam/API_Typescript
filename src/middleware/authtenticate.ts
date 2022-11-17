@@ -8,13 +8,12 @@ export default function authenticateToken(
     res: Response,
     next: NextFunction
 ) {
-    const token = req.cookies['token'];
+    const token = req.cookies.token;
     if (token) {
         if (token === null) {
             return res.sendStatus(401);
         }
         jwt.verify(token, hashSecret, (err: any, user: any) => {
-            console.log(user);
             if (err) return res.sendStatus(403);
             (req as AuthRequest).user = user;
             next();
