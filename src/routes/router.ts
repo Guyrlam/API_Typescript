@@ -15,7 +15,12 @@ import {
     getTeam,
     removeMember,
 } from '../controllers/teams';
-import { verifyAdmToken, verifyLeaderSquad, verifySquad } from '../middleware/login';
+import {
+    verifyAdmToken,
+    verifyLeader,
+    verifyLeaderSquad,
+    verifySquad,
+} from '../middleware/login';
 
 const route = Router();
 
@@ -23,8 +28,8 @@ route.post('/login/', logUser);
 route.post('/users/', register);
 route.get('/users/me', authenticateToken, returnMe);
 route.get('/users', verifyAdmToken, returnUsersList);
-route.get('/users/:user_id', getUserId);
-route.patch('/users/:user_id', updateUser);
+route.get('/users/:user_id', verifyLeader, getUserId);
+route.patch('/users/:user_id', authenticateToken, updateUser);
 route.delete('/users/:user_id');
 route.post('/team/', registerTeam);
 route.get('/team/:team_id', verifySquad, getTeam);
