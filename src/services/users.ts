@@ -2,7 +2,7 @@ import * as validators from '../validators';
 import { databaseConfig, hashSecret } from '../config';
 import { v4 as uuid, validate } from 'uuid';
 import { UserRepository } from '../repository/userRepository';
-import { IUser } from '../interfaces/iuser';
+import { IUser, ILogin } from '../interfaces/iuser';
 import bcrypt from 'bcrypt';
 
 export default class UsersServ {
@@ -56,7 +56,7 @@ export default class UsersServ {
             _data.password = await this.hashPassword(_data.password);
             _data.is_admin = false;
             _data.id = uuid();
-            const data = await repo.addUser(_data, _data.id);
+            const data = await repo.addUser(_data);
             //change user interface
             return { data, err: null, errCode: null };
         } catch (err: any) {
@@ -64,7 +64,32 @@ export default class UsersServ {
             return { data: [], err: err.message, errCode: 500 };
         }
     }
-
+    async login(_data: ILogin): Promise<any> {
+        const repo = new UserRepository();
+        try {
+            const data = await repo.loginUser(_data.email);
+            if (data.rowCount === 1) {
+                const hash = data.rows[0].password;
+                const matchHash = await this.comparePassword(_data.password, hash);
+                if (matchHash === true) {
+                    return { data: data.rows[0], err: null, errCode: null };
+                } else {
+                    return {
+                        data: [],
+                        err: 'Login/Password does not match',
+                        errCode: 401,
+                    };
+                }
+            } else {
+                return {
+                    data: [],
+                    err: 'Login/Password does not match',
+                    errCode: 401,
+                };
+            }
+        } catch (err: any) {
+            // console.log(err);
+            return { data: [], err: err.message, errCode: 500 };
     async getUserId(_id: string) {
         const repository = new UserRepository();
         try {
@@ -92,6 +117,13 @@ export default class UsersServ {
 
     public validate(_data: IUser) {
         const validator = new UserValidator(_data);
+        if (validator.errors) {
+            console.log(validator.errors);
+            throw new Error(validator.errors);
+        }
+    }
+    public validateLogin(_data: ILogin) {
+        const validator = new LoginValidator(_data);
         if (validator.errors) {
             console.log(validator.errors);
             throw new Error(validator.errors);
@@ -138,6 +170,28 @@ class UserValidator extends validators.Validator {
     checkLastName(name: string) {
         const validator = new validators.NameValidator(name, { max_length: 255 });
         if (validator.errors) this.errors += `last_name:${validator.errors},`;
+        return validator.data;
+    }
+
+    checkPassword(password: string) {
+        const validator = new validators.PasswordValidator(password, {
+            max_length: 255,
+        });
+        if (validator.errors) this.errors += `password:${validator.errors},`;
+        return validator.data;
+    }
+}
+class LoginValidator extends validators.Validator {
+    constructor(data: ILogin) {
+        super(data);
+
+        this.data.email = this.checkEmail(data.email);
+        this.data.password = this.checkPassword(data.password);
+    }
+
+    checkEmail(email: string) {
+        const validator = new validators.EmailValidator(email, { max_length: 255 });
+        if (validator.errors) this.errors += `email:${validator.errors},`;
         return validator.data;
     }
 
