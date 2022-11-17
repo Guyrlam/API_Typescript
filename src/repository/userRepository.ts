@@ -130,4 +130,17 @@ export class UserRepository {
             client.release();
         }
     }
+
+    async delUser(id: string) {
+        const client = await pool.connect();
+        const query = 'UPDATE public.users SET deleted_at = now() WHERE id = $1';
+        try {
+            const result = await client.query(query, [id]);
+            return result.rows;
+        } catch (error: any) {
+            throw new Error(error.message);
+        } finally {
+            client.release();
+        }
+    }
 }
