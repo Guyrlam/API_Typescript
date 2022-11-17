@@ -1,11 +1,42 @@
 import * as validators from '../validators';
-import { hashSecret } from '../config';
+import { databaseConfig, hashSecret } from '../config';
 import { v4 as uuid, validate } from 'uuid';
 import { UserRepository } from '../repository/userRepository';
 import { IUser } from '../interfaces/iuser';
 import bcrypt from 'bcrypt';
 
 export default class UsersServ {
+    async login(_data: { email: string; password: string }): Promise<any> {
+        const repo = new UserRepository();
+        try {
+            const emailValidator = new validators.EmailValidator(_data.email, {
+                max_length: 255,
+            });
+            if (emailValidator.errors || !_data.email)
+                throw new Error('Insira um email válido');
+            const passwordValidator = new validators.PasswordValidator(
+                _data.password,
+                {
+                    max_length: 255,
+                }
+            );
+            if (passwordValidator.errors || !_data.password)
+                throw new Error('Insira uma senha válida');
+
+            const log = await repo.login(_data);
+            const isLeader = await repo.isLeader(log.id);
+            const payload = {
+                id: log.id,
+                is_admin: log.is_admin,
+                squad: log.squad,
+                leaderSquad: isLeader,
+            };
+            return { payload, err: null, errCode: null };
+        } catch (err: any) {
+            return { team: [], err: err.message, errCode: 500 };
+        }
+    }
+
     async getAllUsers(): Promise<any> {
         const repo = new UserRepository();
         try {

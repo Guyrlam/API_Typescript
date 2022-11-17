@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, returnUsersList } from '../controllers/users';
+import { register, returnUsersList, logUser } from '../controllers/users';
 import {
     registerTeam,
     returnTeam,
@@ -11,6 +11,7 @@ import { verifyAdmToken, verifyLeaderSquad, verifySquad } from '../middleware/lo
 
 const route = Router();
 
+route.post('/login/', logUser);
 route.post('/users/', register);
 route.get('/users', verifyAdmToken, returnUsersList);
 route.get('/users/:user_id');
