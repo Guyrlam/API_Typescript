@@ -1,6 +1,6 @@
 import * as validators from '../validators';
 import { hashSecret } from '../config';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid, validate as uuidValidate } from 'uuid';
 import { TeamsRepository } from '../repository/teamsRepository';
 import { ITeams } from '../interfaces/iteams';
 import bcrypt from 'bcrypt';
@@ -10,9 +10,26 @@ export default class TeamsServ {
         try {
             const repo = new TeamsRepository();
             this.validate(_data);
-            console.log(_data);
+            if (!uuidValidate(_data.leader)) {
+                throw new Error('500|Id Leader invalid');
+            }
             _data.id = uuid();
             const data = await repo.addTeams(_data, _data.id);
+            repo.addUserTeams(_data.leader, data.id);
+            return { data, err: null, errCode: null };
+        } catch (err: any) {
+            // console.log(err);
+            return { data: [], err: err.message, errCode: 500 };
+        }
+    }
+
+    async addUserTeam(_idUser: string, _idSquad: string): Promise<any> {
+        try {
+            const repo = new TeamsRepository();
+            if (!uuidValidate(_idUser) && !uuidValidate(_idSquad)) {
+                throw new Error('500|ids invalid');
+            }
+            const data = await repo.addUserTeams(_idUser, _idSquad);
             return { data, err: null, errCode: null };
         } catch (err: any) {
             // console.log(err);
@@ -91,5 +108,12 @@ export default class TeamsServ {
 class TeamsValidator extends validators.Validator {
     constructor(data: ITeams) {
         super(data);
+        this.data.name = this.checkEmail(data.name);
+    }
+
+    checkEmail(email: string) {
+        const validator = new validators.NameValidator(email, { max_length: 255 });
+        if (validator.errors) this.errors += `email:${validator.errors},`;
+        return validator.data;
     }
 }

@@ -14,6 +14,7 @@ import {
     delTeam,
     getTeam,
     removeMember,
+    addUserTeam,
 } from '../controllers/teams';
 import { verifyAdmToken, verifyLeaderSquad, verifySquad } from '../middleware/login';
 
@@ -26,7 +27,13 @@ route.get('/users', authenticateToken, verifyAdmToken, returnUsersList);
 route.get('/users/:user_id', getUserId);
 route.patch('/users/:user_id', authenticateToken, updateUser);
 
-route.post('/team/', registerTeam);
+route.post('/team/', authenticateToken, verifyAdmToken, registerTeam);
+route.post(
+    '/team/:team_id/member/:user_id',
+    authenticateToken,
+    verifyAdmToken,
+    registerTeam
+);
 route.get('/team/:team_id', verifySquad, getTeam);
 route.get('/team/', verifyAdmToken, returnTeam);
 route.patch('/team/:team_id');

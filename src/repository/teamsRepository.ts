@@ -11,12 +11,26 @@ export class TeamsRepository {
         const indexstring = indexes.join(', ');
         const values = Object.values(_data as any);
         const query = `INSERT INTO 
-        teams (${keystring}) 
+        Squad (${keystring}) 
         VALUES (${indexstring}) RETURNING *`;
         try {
             console.log(Object.values(_data));
             const result = await client.query({ text: query, values: values });
-            return result.rows;
+            return result.rows[0];
+        } catch (error: any) {
+            throw new Error(error.message);
+        } finally {
+            client.release();
+        }
+    }
+
+    async addUserTeams(_idUser: string, _idSquad: string) {
+        const client = await pool.connect();
+        const values = [_idSquad, _idUser];
+        const query = `UPDATE public.Users SET squad = $1 WHERE id = $2`;
+        try {
+            const result = await client.query({ text: query, values: values });
+            return result.rows[0];
         } catch (error: any) {
             throw new Error(error.message);
         } finally {
