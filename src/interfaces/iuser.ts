@@ -13,3 +13,7 @@ export interface IUser {
     deleted_at?: Date;
     is_admin?: boolean;
 }
+export interface ILogin {
+    email: string;
+    password: string;
+}

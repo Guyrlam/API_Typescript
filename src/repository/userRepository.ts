@@ -1,8 +1,9 @@
+import bcrypt from 'bcrypt';
 import { pool } from './index';
 import { IUser } from '../interfaces/iuser';
 
 export class UserRepository {
-    async addUser(_data: IUser, _id: string) {
+    async addUser(_data: IUser) {
         const client = await pool.connect();
         const keys = Object.keys(_data as any);
         const indexes = keys.map((value, index) => `$${index + 1}`);
@@ -15,6 +16,19 @@ export class UserRepository {
             console.log(Object.values(_data));
             const result = await client.query({ text: query, values: values });
             return result.rows;
+        } catch (error: any) {
+            throw new Error(error.message);
+        } finally {
+            client.release();
+        }
+    }
+
+    async loginUser(_email: string): Promise<any> {
+        const client = await pool.connect();
+        const query = `SELECT * FROM users a WHERE a.email=$1 `;
+        try {
+            const result = await client.query(query, [_email]);
+            return result;
         } catch (error: any) {
             throw new Error(error.message);
         } finally {
@@ -71,9 +85,45 @@ export class UserRepository {
                 param_squad,
                 param_isAdm,
                 updateAt,
-                param_id
+                param_id,
             ]);
             return result.rows;
+        } catch (error: any) {
+            throw new Error(error.message);
+        } finally {
+            client.release();
+        }
+    }
+
+    async login(_data: { email: string; password: string }) {
+        const client = await pool.connect();
+        const query = 'SELECT * FROM public.users WHERE email = $1';
+        try {
+            const findUser = await client.query(query, [_data.email]);
+            if (!findUser.rowCount) throw new Error('Email não cadastrado');
+
+            const comparePassword = await bcrypt.compare(
+                _data.password,
+                findUser.rows[0].password
+            );
+            if (!comparePassword) throw new Error('Login não autorizado');
+
+            return findUser.rows[0];
+        } catch (error: any) {
+            throw new Error(error.message);
+        } finally {
+            client.release();
+        }
+    }
+
+    async isLeader(id: string) {
+        const client = await pool.connect();
+        const query = 'SELECT * FROM public.squad WHERE leader = $1';
+        try {
+            const leader = await client.query(query, [id]);
+            if (!leader.rowCount) return null;
+
+            return leader.rows[0].id;
         } catch (error: any) {
             throw new Error(error.message);
         } finally {

@@ -1,4 +1,5 @@
 import { pool } from './index';
+import { UserRepository } from './userRepository';
 import { ITeams } from '../interfaces/iteams';
 
 export class TeamsRepository {
@@ -23,7 +24,7 @@ export class TeamsRepository {
         }
     }
 
-    async getTeamId(id: any) {
+    async getTeamById(id: string) {
         const client = await pool.connect();
         const query = 'SELECT * FROM public.Squad WHERE id = $1';
         try {
@@ -72,14 +73,33 @@ export class TeamsRepository {
         }
     }
 
-    async getDelete(teams: any) {
-        const id = teams.id;
+    async getDelete(id: string) {
         const client = await pool.connect();
-        const query = 'DELETE * FROM public.Squad WHERE id = $1';
+        const query = 'UPDATE public.Squad SET deleted_at = now() WHERE id = $1';
         try {
             const result = await client.query(query, [id]);
             return result.rows;
         } catch (error: any) {
+            throw new Error(error.message);
+        } finally {
+            client.release();
+        }
+    }
+
+    async remove(team_id: string, user_id: string) {
+        const client = await pool.connect();
+        const query = 'UPDATE public.Users SET squad = null WHERE id = $1';
+        try {
+            await client.query('BEGIN');
+            const response = new UserRepository();
+            const user = await response.getUserId(user_id);
+            if (user[0].squad !== team_id)
+                throw new Error('O usuário não pertence a esse time');
+            const result = await client.query(query, [user_id]);
+            await client.query('COMMIT');
+            return result.rows;
+        } catch (error: any) {
+            await client.query('ROLLBACK');
             throw new Error(error.message);
         } finally {
             client.release();
