@@ -119,6 +119,19 @@ export default class UsersServ {
         }
     }
 
+    async delUser(_id: string) {
+        const repository = new UserRepository();
+        try {
+            if (!validate(_id)) {
+                throw new Error('Id is not a uuid');
+            }
+            const result = await repository.delUser(_id);
+            return { result, erro: null, errCode: null };
+        } catch (error: any) {
+            return { data: [], err: error.message, errCode: 500 };
+        }
+    }
+
     public validate(_data: IUser) {
         const validator = new UserValidator(_data);
         if (validator.errors) {

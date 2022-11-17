@@ -13,6 +13,9 @@ export default function authenticateToken(
         if (token === null) {
             return res.sendStatus(401);
         }
+        if (req.params.user_id) {
+            if (token.id !== req.params.user_id) return res.sendStatus(401);
+        }
         jwt.verify(token, hashSecret, (err: any, user: any) => {
             console.log(user);
             if (err) return res.sendStatus(403);
