@@ -12,6 +12,7 @@ import { verifyAdmToken, verifyLeaderSquad, verifySquad } from '../middleware/lo
 
 const route = Router();
 
+route.post('/login/', logUser);
 route.post('/users/', register);
 route.post('/users/login', login);
 route.get('/users/', authenticateToken, returnUsersList);
