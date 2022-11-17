@@ -37,12 +37,13 @@ export async function returnUsersList(req: Request, res: Response) {
 
 export async function returnMe(req: Request, res: Response) {
     try {
-        const payload = (req as AuthRequest).user;
+        const payload = (req as AuthRequest).user.payload;
         const newUser = new UsersServ();
-        const response = await newUser.getUserId(payload);
+        const response = await newUser.getUserId(payload.id);
         const token = jwt.sign(payload, hashSecret, { expiresIn: '1800s' });
         res.cookie('token', token, { maxAge: 900000, httpOnly: true });
-        return APIResponse.sucess(res, response, 201);
+        delete response.result.password;
+        return APIResponse.sucess(res, response.result, 201);
     } catch (e: any) {
         return APIResponse.error(res, (e as Error).message);
     }
@@ -53,13 +54,14 @@ export async function register(req: Request, res: Response) {
     try {
         const newUser = new UsersServ();
         const response = await newUser.addUser(userData);
-        return APIResponse.sucess(res, response, 201);
+        delete response.data.password;
+        return APIResponse.sucess(res, response.data, 201);
     } catch (e: any) {
         return APIResponse.error(res, (e as Error).message);
     }
 }
 
-export async function login(req: Request, res: Response) {
+/* export async function login(req: Request, res: Response) {
     const userData: ILogin = req.body;
     try {
         const newUser = new UsersServ();
@@ -77,7 +79,7 @@ export async function login(req: Request, res: Response) {
         // console.log(e);
         return APIResponse.error(res, (e as Error).message);
     }
-}
+} */
 
 export async function getUserId(req: Request, res: Response) {
     const id = req.body;

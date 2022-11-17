@@ -25,7 +25,7 @@ route.get('/users/me', authenticateToken, returnMe);
 route.get('/users', verifyAdmToken, returnUsersList);
 route.get('/users/:user_id', getUserId);
 route.patch('/users/:user_id', updateUser);
-
+route.delete('/users/:user_id');
 route.post('/team/', registerTeam);
 route.get('/team/:team_id', verifySquad, getTeam);
 route.get('/team/', verifyAdmToken, returnTeam);
