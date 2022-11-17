@@ -23,7 +23,7 @@ export class TeamsRepository {
         }
     }
 
-    async getTeamId(id: any) {
+    async getTeamById(id: string) {
         const client = await pool.connect();
         const query = 'SELECT * FROM public.Squad WHERE id = $1';
         try {
