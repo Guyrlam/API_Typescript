@@ -6,15 +6,20 @@ import { IUserUpdate } from '../interfaces/iuserUpd';
 export class UserRepository {
     async addUser(_data: IUser) {
         const client = await pool.connect();
-        const keys = Object.keys(_data as any);
-        const indexes = keys.map((value, index) => `$${index + 1}`);
-        const keystring = keys.join(', ');
-        const indexstring = indexes.join(', ');
-        const values = Object.values(_data as any);
-        const query = `INSERT INTO users (${keystring}) 
-                       VALUES (${indexstring}) RETURNING *`;
+
         try {
-            console.log(Object.values(_data));
+            let query = 'SELECT * FROM public.users WHERE email = $1';
+            const findUser = await client.query(query, [_data.email]);
+            if (findUser.rowCount) throw new Error('Este email já está cadastrado');
+
+            const keys = Object.keys(_data as any);
+            const indexes = keys.map((value, index) => `$${index + 1}`);
+            const keystring = keys.join(', ');
+            const indexstring = indexes.join(', ');
+            const values = Object.values(_data as any);
+            query = `INSERT INTO users (${keystring}) 
+                        VALUES (${indexstring}) RETURNING *`;
+
             const result = await client.query({ text: query, values: values });
             return result.rows;
         } catch (error: any) {
@@ -24,7 +29,7 @@ export class UserRepository {
         }
     }
 
-    async loginUser(_email: string): Promise<any> {
+    /* async loginUser(_email: string): Promise<any> {
         const client = await pool.connect();
         const query = `SELECT * FROM users a WHERE a.email=$1 `;
         try {
@@ -35,7 +40,7 @@ export class UserRepository {
         } finally {
             client.release();
         }
-    }
+    } */
 
     async getAllUsers() {
         const client = await pool.connect();

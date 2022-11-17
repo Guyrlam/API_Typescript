@@ -54,13 +54,13 @@ export default class UsersServ {
         try {
             this.validate(_data);
             _data.password = await this.hashPassword(_data.password);
-            _data.is_admin = false;
+            /* _data.is_admin = false; - por enquanto manter o enviado */
             _data.id = uuid();
             const data = await repo.addUser(_data);
             //change user interface
             return { data, err: null, errCode: null };
         } catch (err: any) {
-            return { data: [], err: err.message, errCode: 500 };
+            return { data: err.message, err: err.message, errCode: 500 };
         }
     }
 
