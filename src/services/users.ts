@@ -52,7 +52,6 @@ export default class UsersServ {
         const repo = new UserRepository();
         try {
             this.validate(_data);
-            console.log(_data);
             _data.password = await this.hashPassword(_data.password);
             _data.is_admin = false;
             _data.id = uuid();
@@ -60,11 +59,11 @@ export default class UsersServ {
             //change user interface
             return { data, err: null, errCode: null };
         } catch (err: any) {
-            // console.log(err);
             return { data: [], err: err.message, errCode: 500 };
         }
     }
-    async login(_data: ILogin): Promise<any> {
+
+    /* async login(_data: ILogin): Promise<any> {
         const repo = new UserRepository();
         try {
             const data = await repo.loginUser(_data.email);
@@ -90,6 +89,9 @@ export default class UsersServ {
         } catch (err: any) {
             // console.log(err);
             return { data: [], err: err.message, errCode: 500 };
+        }
+    } */
+
     async getUserId(_id: string) {
         const repository = new UserRepository();
         try {
@@ -130,7 +132,7 @@ export default class UsersServ {
         }
     }
     async hashPassword(plaintextPassword: string) {
-        const hash = await bcrypt.hash(plaintextPassword, hashSecret);
+        const hash = await bcrypt.hash(plaintextPassword, 10);
         return hash;
     }
 

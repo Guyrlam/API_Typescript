@@ -7,7 +7,7 @@ export interface IUser {
     first_name: string;
     last_name: string;
     password: string;
-    squad?: RandomUUIDOptions;
+    squad?: string;
     updated_at?: Date;
     created_at?: Date;
     deleted_at?: Date;

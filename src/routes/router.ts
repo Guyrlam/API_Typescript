@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, returnUsersList, login } from '../controllers/users';
+import { register, returnUsersList, login, logUser } from '../controllers/users';
 import authenticateToken from '../middleware/authtenticate';
 import {
     registerTeam,
@@ -14,7 +14,6 @@ const route = Router();
 
 route.post('/login/', logUser);
 route.post('/users/', register);
-route.post('/users/login', login);
 route.get('/users/', authenticateToken, returnUsersList);
 route.patch('/users/:user_id');
 
