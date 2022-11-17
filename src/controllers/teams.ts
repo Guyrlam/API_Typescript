@@ -1,43 +1,76 @@
 import { Request, Response } from 'express';
-import UsersServ from '../services/users';
+import TeamsServ from '../services/teams';
 import { ITeams } from '../interfaces/iteams';
 import jwt from 'jsonwebtoken';
 import { hashSecret } from '../config';
+import { APIResponse } from '../utils/api-response';
 
-export async function register(req: Request, res: Response) {
-    const userData: ITeams = req.body;
-    try {
-        const newUser = new UsersServ();
-        const response = await newUser.addUser(userData);
-        // console.log(userData)
-        const user_id = response.data.id;
-        const token = jwt.sign({ id: user_id }, hashSecret, { expiresIn: '1800s' });
-        const timer = 900000;
-        res.cookie('token', token, { maxAge: timer, httpOnly: true });
+async function registerTeam(req: Request, res: Response) {
+    const service = new TeamsServ();
+    const response = await service.addTeams(req.body);
+
+    if (response.err === null) {
+        const token = jwt.sign(req.cookies, hashSecret, { expiresIn: '1800s' });
+        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         return APIResponse.sucess(res, response, 201);
-    } catch (e: any) {
-        // console.log(e);
-        return APIResponse.error(res, (e as Error).message);
+    } else {
+        return APIResponse.error(res, (response.err as Error).message);
     }
 }
 
-class APIResponse {
-    static error(res: Response, data: string) {
-        //console.log(data)
-        const msgInfos = (data as string).split(/\|/gim);
-        //console.log(msgInfos);
-        const msgs = msgInfos[1].replace(/(,$)/gim, '').split(',');
+async function returnTeam(req: Request, res: Response) {
+    const service = new TeamsServ();
+    const teamList = await service.getTeams();
 
-        res.status(Number(msgInfos[0])).json({
-            data: null,
-            messages: msgs,
-        });
-    }
-
-    static sucess(res: Response, data: any, status = 200) {
-        return res.status(status).json({
-            data: data,
-            messages: [],
-        });
+    if (teamList.err === null) {
+        const token = jwt.sign(req.cookies, hashSecret, { expiresIn: '1800s' });
+        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
+        return APIResponse.sucess(res, teamList, 201);
+    } else {
+        return APIResponse.error(res, (teamList.err as Error).message);
     }
 }
+
+async function delTeam(req: Request, res: Response) {
+    const service = new TeamsServ();
+    const response = await service.delTeams(req.params.team_id);
+
+    if (response.err === null) {
+        const token = jwt.sign(req.cookies, hashSecret, { expiresIn: '1800s' });
+        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
+        return APIResponse.sucess(res, response, 201);
+    } else {
+        return APIResponse.error(res, (response.err as Error).message);
+    }
+}
+
+async function removeMember(req: Request, res: Response) {
+    const service = new TeamsServ();
+    const response = await service.removeMember(
+        req.params.team_id,
+        req.params.user_id
+    );
+
+    if (response.err === null) {
+        const token = jwt.sign(req.cookies, hashSecret, { expiresIn: '1800s' });
+        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
+        return APIResponse.sucess(res, response, 201);
+    } else {
+        return APIResponse.error(res, (response.err as Error).message);
+    }
+}
+
+async function getTeam(req: Request, res: Response) {
+    const service = new TeamsServ();
+    const response = await service.getTeamById(req.params.team_id);
+
+    if (response.err === null) {
+        const token = jwt.sign(req.cookies, hashSecret, { expiresIn: '1800s' });
+        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
+        return APIResponse.sucess(res, response, 201);
+    } else {
+        return APIResponse.error(res, (response.err as Error).message);
+    }
+}
+
+export { registerTeam, returnTeam, delTeam, getTeam, removeMember };

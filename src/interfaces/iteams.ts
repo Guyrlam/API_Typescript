@@ -1,7 +1,5 @@
-import { RandomUUIDOptions } from 'crypto';
-
 export interface ITeams {
-    id?: RandomUUIDOptions | string;
+    id: string;
     name: string;
-    leader: RandomUUIDOptions;
+    leader: string;
 }
