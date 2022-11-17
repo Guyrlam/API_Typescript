@@ -65,3 +65,25 @@ export async function login(req: Request, res: Response) {
         return APIResponse.error(res, (e as Error).message);
     }
 }
+
+export async function getUserId(req: Request, res: Response) {
+    const id = req.body;
+    try {
+        const newUser = new UsersServ();
+        const response = await newUser.getUserId(id);
+        return APIResponse.sucess(res, response, 201);
+    } catch (e: any) {
+        return APIResponse.error(res, (e as Error).message);
+    }
+}
+
+export async function updateUser(req: Request, res: Response) {
+    const userData: IUser = req.body;
+    try {
+        const newUser = new UsersServ();
+        const response = await newUser.updateUser(userData);
+        return APIResponse.sucess(res, response, 201);
+    } catch (e: any) {
+        return APIResponse.error(res, (e as Error).message);
+    }
+}
