@@ -5,7 +5,6 @@ import { AuthRequest } from '../interfaces/irequest';
 import jwt from 'jsonwebtoken';
 import { hashSecret } from '../config';
 import { APIResponse } from '../utils/api-response';
-import { AuthRequest } from '../interfaces/irequest';
 
 async function registerTeam(req: Request, res: Response) {
     const service = new TeamsServ();
@@ -21,11 +20,11 @@ async function registerTeam(req: Request, res: Response) {
 async function UpdateTeam(req: Request, res: Response) {
     const team: ITeamsUpdate = req.body;
     const id = req.params.team_id;
-    const idUser = (req as AuthRequest).user.squad;
+    const idUser = (req as AuthRequest).user.leaderSquad;
     const is_admin = (req as AuthRequest).user.is_admin;
     console.log(idUser);
     try {
-        if (id != idUser || is_admin) {
+        if (id != idUser) {
             throw new Error('500|Você não pode Alterar esta conta');
         }
         const service = new TeamsServ();

@@ -14,7 +14,7 @@ export class TeamsRepository {
         squad (${keystring}) 
         VALUES (${indexstring}) RETURNING *`;
         try {
-            let query = 'SELECT * FROM public.squads WHERE name = $1';
+            let query = 'SELECT * FROM public.squad WHERE name = $1';
             const findSquad = await client.query(query, [_data.name]);
             if (findSquad.rowCount)
                 throw new Error('Este nome de grupo já está cadastrado');
@@ -25,7 +25,7 @@ export class TeamsRepository {
             const indexstring = indexes.join(', ');
             const values = Object.values(_data as any);
             query = `INSERT INTO 
-            teams (${keystring}) 
+            squad (${keystring}) 
             VALUES (${indexstring}) RETURNING *`;
 
             const result = await client.query({ text: query, values: values });
