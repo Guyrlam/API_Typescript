@@ -12,7 +12,7 @@ export async function logUser(req: Request, res: Response) {
     const response = await service.login(req.body);
 
     if (response.err === null) {
-        const token = jwt.sign(response, hashSecret, { expiresIn: '1800s' });
+        const token = jwt.sign(response.payload, hashSecret, { expiresIn: '1800s' });
         res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         return APIResponse.sucess(
             res,
@@ -38,11 +38,9 @@ export async function returnUsersList(req: Request, res: Response) {
 
 export async function returnMe(req: Request, res: Response) {
     try {
-        const payload = (req as AuthRequest).user.payload;
+        const payload = (req as AuthRequest).user;
         const newUser = new UsersServ();
         const response = await newUser.getUserId(payload.id);
-        const token = jwt.sign(payload, hashSecret, { expiresIn: '1800s' });
-        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         delete response.result.password;
         return APIResponse.sucess(res, response.result, 201);
     } catch (e: any) {
@@ -62,33 +60,11 @@ export async function register(req: Request, res: Response) {
     }
 }
 
-/* export async function login(req: Request, res: Response) {
-    const userData: ILogin = req.body;
-    try {
-        const newUser = new UsersServ();
-        const response = await newUser.login(userData);
-        // console.log(userData)
-        const user_id = response.data.id;
-        const is_admin = response.data.is_admin;
-        const token = jwt.sign({ id: user_id, is_admin }, hashSecret, {
-            expiresIn: '1800s',
-        });
-        const timer = 900000;
-        res.cookie('token', token, { maxAge: timer, httpOnly: true });
-        return APIResponse.sucess(res, response, 201);
-    } catch (e: any) {
-        // console.log(e);
-        return APIResponse.error(res, (e as Error).message);
-    }
-} */
-
 export async function getUserId(req: Request, res: Response) {
     const id = req.params.user_id;
     try {
         const newUser = new UsersServ();
         const response = await newUser.getUserId(id);
-        const token = jwt.sign(req.cookies, hashSecret, { expiresIn: '1800s' });
-        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         return APIResponse.sucess(res, response, 201);
     } catch (e: any) {
         return APIResponse.error(res, (e as Error).message);
@@ -98,12 +74,14 @@ export async function getUserId(req: Request, res: Response) {
 export async function updateUser(req: Request, res: Response) {
     const userData: IUserUpdate = req.body;
     const id = req.params.user_id;
+    const idUser = (req as AuthRequest).user.id;
+    if (id != idUser) {
+        throw new Error('500|Você não pode Alterar esta conta');
+    }
     try {
-        const payload = (req as AuthRequest).user.payload;
+        const payload = (req as AuthRequest).user;
         const newUser = new UsersServ();
         const response = await newUser.updateUser(userData, id);
-        const token = jwt.sign(payload, hashSecret, { expiresIn: '1800s' });
-        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         return APIResponse.sucess(res, response, 201);
     } catch (e: any) {
         return APIResponse.error(res, (e as Error).message);
@@ -114,8 +92,6 @@ export async function delUser(req: Request, res: Response) {
     try {
         const newUser = new UsersServ();
         const response = await newUser.delUser(req.params.user_id);
-        const token = jwt.sign(req.cookies, hashSecret, { expiresIn: '1800s' });
-        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         return APIResponse.sucess(res, response, 201);
     } catch (e: any) {
         return APIResponse.error(res, (e as Error).message);

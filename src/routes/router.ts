@@ -16,6 +16,7 @@ import {
     getTeam,
     removeMember,
     addMember,
+    UpdateTeam,
 } from '../controllers/teams';
 import {
     verifyAdmToken,
@@ -37,7 +38,7 @@ route.post('/team/', verifyAdmToken, registerTeam);
 route.post('/team/:team_id/member/:user_id', verifyLeaderSquad, addMember);
 route.get('/team/:team_id', verifySquad, getTeam);
 route.get('/team/', verifyAdmToken, returnTeam);
-route.patch('/team/:team_id');
+route.patch('/team/:team_id', authenticateToken, verifyLeaderSquad, UpdateTeam);
 route.delete('/team/:team_id', verifyAdmToken, delTeam);
 route.delete('/team/:team_id/member/:user_id', verifyLeaderSquad, removeMember);
 
