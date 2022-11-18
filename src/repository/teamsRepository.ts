@@ -14,7 +14,20 @@ export class TeamsRepository {
         squad (${keystring}) 
         VALUES (${indexstring}) RETURNING *`;
         try {
-            console.log(Object.values(_data));
+            let query = 'SELECT * FROM public.squads WHERE name = $1';
+            const findSquad = await client.query(query, [_data.name]);
+            if (findSquad.rowCount)
+                throw new Error('Este nome de grupo já está cadastrado');
+
+            const keys = Object.keys(_data as any);
+            const indexes = keys.map((value, index) => `$${index + 1}`);
+            const keystring = keys.join(', ');
+            const indexstring = indexes.join(', ');
+            const values = Object.values(_data as any);
+            query = `INSERT INTO 
+            teams (${keystring}) 
+            VALUES (${indexstring}) RETURNING *`;
+
             const result = await client.query({ text: query, values: values });
             return result.rows;
         } catch (error: any) {

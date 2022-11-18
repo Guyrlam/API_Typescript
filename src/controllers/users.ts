@@ -27,11 +27,15 @@ export async function logUser(req: Request, res: Response) {
 export async function returnUsersList(req: Request, res: Response) {
     console.log((req as AuthRequest).user);
     try {
+        const payload = (req as AuthRequest).user;
+        delete payload.exp;
         const newUser = new UsersServ();
         const response = await newUser.getAllUsers();
+        const token = jwt.sign(payload, hashSecret, { expiresIn: '1800s' });
+        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         return APIResponse.sucess(res, response, 201);
     } catch (e: any) {
-        // console.log(e);
+        console.log('AAAAA', e);
         return APIResponse.error(res, (e as Error).message);
     }
 }
@@ -63,6 +67,8 @@ export async function register(req: Request, res: Response) {
 export async function getUserId(req: Request, res: Response) {
     const id = req.params.user_id;
     try {
+        const payload = (req as AuthRequest).user;
+        delete payload.exp;
         const newUser = new UsersServ();
         const response = await newUser.getUserId(id);
         return APIResponse.sucess(res, response, 201);
@@ -90,6 +96,8 @@ export async function updateUser(req: Request, res: Response) {
 
 export async function delUser(req: Request, res: Response) {
     try {
+        const payload = (req as AuthRequest).user;
+        delete payload.exp;
         const newUser = new UsersServ();
         const response = await newUser.delUser(req.params.user_id);
         return APIResponse.sucess(res, response, 201);

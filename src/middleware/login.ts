@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { hashSecret } from '../config';
+import { AuthRequest } from '../interfaces/irequest';
 import { APIResponse } from '../utils/api-response';
 
 type JWTPayload = {
@@ -20,7 +21,7 @@ export async function verifyAdmToken(
         if (!decode.is_admin) {
             throw new Error('Operação não autorizada!');
         }
-        req.cookies = {
+        (req as AuthRequest).user = {
             id: decode.id,
             is_admin: decode.is_admin,
             squad: decode.squad,
@@ -42,7 +43,7 @@ export async function verifySquad(
         if (!decode.is_admin && decode.squad !== req.params.team_id) {
             throw new Error('Operação não autorizada!');
         }
-        req.cookies = {
+        (req as AuthRequest).user = {
             id: decode.id,
             is_admin: decode.is_admin,
             squad: decode.squad,
@@ -64,7 +65,7 @@ export async function verifyLeaderSquad(
         if (!decode.is_admin && decode.leaderSquad !== req.params.team_id) {
             throw new Error('Operação não autorizada!');
         }
-        req.cookies = {
+        (req as AuthRequest).user = {
             id: decode.id,
             is_admin: decode.is_admin,
             squad: decode.squad,
@@ -86,7 +87,7 @@ export async function verifyLeader(
         if (!decode.is_admin && decode.leaderSquad === null) {
             throw new Error('Operação não autorizada!');
         }
-        req.cookies = {
+        (req as AuthRequest).user = {
             id: decode.id,
             is_admin: decode.is_admin,
             squad: decode.squad,

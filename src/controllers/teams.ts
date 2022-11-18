@@ -5,6 +5,7 @@ import { AuthRequest } from '../interfaces/irequest';
 import jwt from 'jsonwebtoken';
 import { hashSecret } from '../config';
 import { APIResponse } from '../utils/api-response';
+import { AuthRequest } from '../interfaces/irequest';
 
 async function registerTeam(req: Request, res: Response) {
     const service = new TeamsServ();
@@ -45,7 +46,9 @@ async function returnTeam(req: Request, res: Response) {
     const teamList = await service.getTeams();
 
     if (teamList.err === null) {
-        const token = jwt.sign(req.cookies, hashSecret, { expiresIn: '1800s' });
+        const payload = (req as AuthRequest).user;
+        delete payload.exp;
+        const token = jwt.sign(payload, hashSecret, { expiresIn: '1800s' });
         res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         return APIResponse.sucess(res, teamList, 201);
     } else {
@@ -58,7 +61,9 @@ async function delTeam(req: Request, res: Response) {
     const response = await service.delTeams(req.params.team_id);
 
     if (response.err === null) {
-        const token = jwt.sign(req.cookies, hashSecret, { expiresIn: '1800s' });
+        const payload = (req as AuthRequest).user;
+        delete payload.exp;
+        const token = jwt.sign(payload, hashSecret, { expiresIn: '1800s' });
         res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         return APIResponse.sucess(res, response, 201);
     } else {
@@ -85,7 +90,9 @@ async function getTeam(req: Request, res: Response) {
     const response = await service.getTeamById(req.params.team_id);
 
     if (response.err === null) {
-        const token = jwt.sign(req.cookies, hashSecret, { expiresIn: '1800s' });
+        const payload = (req as AuthRequest).user;
+        delete payload.exp;
+        const token = jwt.sign(payload, hashSecret, { expiresIn: '1800s' });
         res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         return APIResponse.sucess(res, response, 201);
     } else {

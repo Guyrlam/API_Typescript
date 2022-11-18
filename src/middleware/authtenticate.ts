@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import { hashSecret } from '../config';
 import { AuthRequest } from '../interfaces/irequest';
 
@@ -14,7 +14,8 @@ export default function authenticateToken(
             return res.sendStatus(401);
         }
         if (req.params.user_id) {
-            if (token.id !== req.params.user_id) return res.sendStatus(401);
+            const decode = jwt.verify(req.cookies.token, hashSecret) as JwtPayload;
+            if (decode.id !== req.params.user_id) return res.sendStatus(401);
         }
         jwt.verify(token, hashSecret, (err: any, user: any) => {
             console.log(user);
