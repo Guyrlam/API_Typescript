@@ -45,7 +45,7 @@ export class UserRepository {
 
     async getAllUsers() {
         const client = await pool.connect();
-        const query = 'SELECT * FROM public.users WHERE deleted_at isnull';
+        const query = 'SELECT * FROM public.users WHERE deleted_at IS NULL';
         try {
             const result = await client.query(query);
             return result.rows;
@@ -73,19 +73,16 @@ export class UserRepository {
     async updateUser(_data: IUserUpdate, _id: string) {
         const client = await pool.connect();
         const keys = Object.keys(_data as any);
-        const indexes = keys.map((value, index) => `$${index + 1}`);
+        const indexes = keys.map((value, index) => `${value} = $${index + 1}`);
+        const keystring = keys.join(', ');
+        const indexstring = indexes.join(', ');
         const values = Object.values(_data as any);
-        let query = `UPDATE public.users SET`;
-        const updateAt = new Date();
-        for (let index = 0; index < indexes.length; index++) {
-            query += ` ${keys[index]} = ${indexes[index]},`;
-        }
-        query += ` updated_at = $${indexes.length + 1} WHERE id = $${
-            indexes.length + 2
-        } AND deleted_at isnull RETURNING *`;
-        values.push(updateAt, _id);
+        values.push(_id);
+        const query = `UPDATE public.users SET ${indexstring} WHERE id = $${
+            indexes.length + 1
+        }`;
         try {
-            const result = await client.query({ text: query, values: values });
+            const result = await client.query(query, values);
             return result.rows;
         } catch (error: any) {
             throw new Error(error.message);

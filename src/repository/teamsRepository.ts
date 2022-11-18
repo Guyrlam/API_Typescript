@@ -5,7 +5,14 @@ import { ITeams } from '../interfaces/iteams';
 export class TeamsRepository {
     async addTeams(_data: ITeams, _id: string) {
         const client = await pool.connect();
-
+        const keys = Object.keys(_data as any);
+        const indexes = keys.map((value, index) => `$${index + 1}`);
+        const keystring = keys.join(', ');
+        const indexstring = indexes.join(', ');
+        const values = Object.values(_data as any);
+        const query = `INSERT INTO 
+        squad (${keystring}) 
+        VALUES (${indexstring}) RETURNING *`;
         try {
             let query = 'SELECT * FROM public.squads WHERE name = $1';
             const findSquad = await client.query(query, [_data.name]);
@@ -24,6 +31,7 @@ export class TeamsRepository {
             const result = await client.query({ text: query, values: values });
             return result.rows;
         } catch (error: any) {
+            console.log(error.message);
             throw new Error(error.message);
         } finally {
             client.release();
@@ -43,21 +51,20 @@ export class TeamsRepository {
         }
     }
 
-    async updateTeam(teams: any) {
+    async updateTeam(_data: any, _id: string) {
         const client = await pool.connect();
-        const param_name = teams.name;
-        const param_leader = teams.leader;
-        const updateAt = new Date();
-        const id = teams.id;
-        const query =
-            'UPDATE public.Squad SET name = $1, leader = $2, update_at = $3 WHERE id = $4';
+        const keys = Object.keys(_data as any);
+        const indexes = keys.map((value, index) => `${value} = $${index + 1}`);
+        const keystring = keys.join(', ');
+        const indexstring = indexes.join(', ');
+        const values = Object.values(_data as any);
+        values.push(_id);
+        const query = `UPDATE public.squad SET ${indexstring} WHERE id = $${
+            indexes.length + 1
+        }`;
         try {
-            const result = await client.query(query, [
-                param_name,
-                param_leader,
-                updateAt,
-                id,
-            ]);
+            const result = await client.query(query, values);
+            console.log(result.rows);
             return result.rows;
         } catch (error: any) {
             throw new Error(error.message);
@@ -68,7 +75,7 @@ export class TeamsRepository {
 
     async getTeams() {
         const client = await pool.connect();
-        const query = 'SELECT * FROM public.Squad';
+        const query = 'SELECT * FROM public.Squad WHERE deleted_at IS NULL';
         try {
             const result = await client.query(query);
             return result.rows;
@@ -91,6 +98,18 @@ export class TeamsRepository {
             client.release();
         }
     }
+    async removeAllUsersTeam(id: string) {
+        const client = await pool.connect();
+        const query = 'UPDATE public.Users SET squad = null WHERE squad = $1';
+        try {
+            const result = await client.query(query, [id]);
+            return result.rows;
+        } catch (error: any) {
+            throw new Error(error.message);
+        } finally {
+            client.release();
+        }
+    }
 
     async remove(team_id: string, user_id: string) {
         const client = await pool.connect();
@@ -99,7 +118,7 @@ export class TeamsRepository {
             await client.query('BEGIN');
             const response = new UserRepository();
             const user = await response.getUserId(user_id);
-            if (user[0].squad !== team_id)
+            if (user.squad !== team_id)
                 throw new Error('O usuário não pertence a esse time');
             const result = await client.query(query, [user_id]);
             await client.query('COMMIT');
@@ -119,7 +138,7 @@ export class TeamsRepository {
             await client.query('BEGIN');
             const response = new UserRepository();
             const user = await response.getUserId(user_id);
-            if (user[0].squad !== null)
+            if (user.squad !== null)
                 throw new Error('O usuário já pertence a um time');
             const result = await client.query(query, [team_id, user_id]);
             await client.query('COMMIT');
