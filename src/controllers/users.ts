@@ -112,7 +112,7 @@ export async function updateUser(req: Request, res: Response) {
         const response = await newUser.updateUser(userData, id);
         const token = jwt.sign(payload, hashSecret, { expiresIn: '1800s' });
         res.cookie('token', token, { maxAge: 900000, httpOnly: true });
-        return APIResponse.sucess(res, response, 201);
+        return APIResponse.sucess(res, response.result, 201);
     } catch (e: any) {
         return APIResponse.error(res, (e as Error).message);
     }
